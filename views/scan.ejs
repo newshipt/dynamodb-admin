@@ -214,7 +214,20 @@
       listContainer.append(uniqueKeys.map(key => $(`<option value="${key}"></option>`)))
     }
 
+    function isDateInt(val) {
+      return Number.isInteger(val) && val >= 0;
+    }
+
     function renderItems(data) {
+      const parse_types = {
+        DEFAULT: 0,
+        DATE_INT: 1,
+        DATE_STRING: 2
+      }
+      column_parsed_type = {}
+
+      data.uniqueKeys.map(key => column_parsed_type[key] = null)
+
       $('#actions-row').append(data.uniqueKeys.map(key => '<td>' + key + '</td>'))
 
       if (data.Items.length) {
@@ -225,23 +238,58 @@
           for (const column of data.uniqueKeys) {
             const columnEl = $('<td></td>')
 
-            const value = item[column]
+            let value = item[column]
             let wrapperEl = null
 
-            if (Number.isInteger(value) && value >= 0) {
-              let dateValue
-              try {
-                dateValue = new Date(value).toISOString()
-              } catch (error) {
-                dateValue = error.message
+            // checks only the first value of this column
+            if (column_parsed_type[column] === null && column.endsWith('At')) {
+
+              if (isDateInt(value)) {
+                column_parsed_type[column] = parse_types.DATE_INT;
+
+              } else if (!value.includes('.') && !Number.isNaN(value)) {
+                const value_int = parseInt(value)
+
+                if (isDateInt(value_int)) {
+                  column_parsed_type[column] = parse_types.DATE_STRING
+                }
               }
 
-              wrapperEl = $('<abbr data-toggle="tooltip" data-placement="top" title="' + dateValue + '"></abbr>')
-            } else {
-              wrapperEl = $('<div class="preformatted"></div>')
+              // failed to detect so force it here so we don't keep checking...if the first values returned are null we fail oh well
+              if (column_parsed_type[column] === null) {
+                column_parsed_type[column] = parse_types.DEFAULT
+              } else {
+                // Add columns to render human readable date values of the original column
+                curColLocation = $(`#actions-row > td:contains('${column}')`)
+                $(`<td>${column} Local</td>`).insertAfter(curColLocation)
+                $(`<td>${column} UTC</td>`).insertAfter(curColLocation)
+                // ends up being e.g. CreatedAt, CreatdAt UTC, CreatedAt Local
+              }
             }
 
+            if (column_parsed_type[column] === parse_types.DATE_STRING) {
+              value = parseInt(value)
+            }
+
+            wrapperEl = $('<div class="preformatted"></div>')
             rowEl.append(columnEl.append(wrapperEl.append(JSONRender(value))))
+
+            if (column_parsed_type[column] === parse_types.DATE_INT
+                || column_parsed_type[column] === parse_types.DATE_STRING) {
+
+              let valueDate = new Date(0)
+              try {
+                valueDate.setUTCSeconds(value)
+
+              } catch (error) {
+                valueDate = error.message
+              }
+
+              date_utc_el = $(`<td><div class="date-utc">${valueDate.toUTCString()}</div></td>`)
+              rowEl.append(date_utc_el)
+              date_local_el = $(`<td><div class="date-local">${valueDate.toLocaleDateString()}  ${valueDate.toLocaleTimeString()}</div></td>`)
+              rowEl.append(date_local_el)
+            }
           }
 
           return rowEl
