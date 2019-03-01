@@ -222,7 +222,8 @@
       const parse_types = {
         DEFAULT: 0,
         DATE_INT: 1,
-        DATE_STRING: 2
+        DATE_STRING: 2,
+        JSON: 3,
       }
       column_parsed_type = {}
 
@@ -256,14 +257,20 @@
               }
 
               // failed to detect so force it here so we don't keep checking...if the first values returned are null we fail oh well
-              if (column_parsed_type[column] === null) {
-                column_parsed_type[column] = parse_types.DEFAULT
-              } else {
-                // Add columns to render human readable date values of the original column
-                curColLocation = $(`#actions-row > td:contains('${column}')`)
-                $(`<td>${column} Local</td>`).insertAfter(curColLocation)
-                $(`<td>${column} UTC</td>`).insertAfter(curColLocation)
-                // ends up being e.g. CreatedAt, CreatdAt UTC, CreatedAt Local
+              switch(column_parsed_type[column])
+                case parse_types.DATE_INT:
+                case parse_types.DATE_STRING:
+                  // Add columns to render human readable date values of the original column
+                  curColLocation = $(`#actions-row > td:contains('${column}')`)
+                  $(`<td>${column} Local</td>`).insertAfter(curColLocation)
+                  $(`<td>${column} UTC</td>`).insertAfter(curColLocation)
+                  // ends up being e.g. CreatedAt, CreatdAt UTC, CreatedAt Local
+                  break;
+                case parse_types.JSON:
+                  // TODO
+                case parse_types.DEFAULT:
+                default:
+                  column_parsed_type[column] = parse_types.DEFAULT;
               }
             }
 
