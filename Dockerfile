@@ -4,6 +4,10 @@ ADD . .
 
 RUN npm install
 
-ARG DYNAMO_ENDPOINT="http://localhost:8000"
+ENV DYNAMO_ENDPOINT="http://localhost:8000"
+ENV AWS_REGION=${AWS_REGION}
+ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
 EXPOSE 8001
 CMD ["node", "bin/dynamodb-admin.js"]
