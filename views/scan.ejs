@@ -346,7 +346,9 @@
           renderItems(json)
         })
         .catch(error => {
-          alert('Error loading data: ' + error)
+          const errMsg = `'Error loading data: ${error}`
+          $('#table-placeholder').text(errMsg)
+          console.log(errMsg)
         })
     })
     </script>
