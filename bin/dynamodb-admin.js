@@ -22,10 +22,9 @@ parser.addArgument(['-o', '--open'], {
   help: 'Open server URL in default browser on start',
 })
 
-parser.addArgument(['-h', '--host'], {
-  type: 'string',
-  defaultValue: 'localhost',
-  help: 'Hostname or IP to run on (default: localhost)',
+parser.addArgument(['-H', '--host'], {
+  defaultValue: '0.0.0.0',
+  help: 'Hostname or IP to run on (default: 0.0.0.0)',
 })
 
 parser.addArgument(['-p', '--port'], {
@@ -41,9 +40,9 @@ const host = process.env.HOST || args.host
 const port = process.env.PORT || args.port
 const server = app.listen(port, host)
 server.on('listening', () => {
-  const host_actual = server.address().host
+  const host_actual = server.address().address
   const port_actual = server.address().port
-  console.log(` dynamodb-admin listening on http://${host_actual}:${port_actual}`)
+  console.log(` dynamodb-viewer listening on http://${host_actual}:${port_actual}`)
 
   if (args.open) {
     opn(url)
