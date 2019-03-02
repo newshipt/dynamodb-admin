@@ -223,7 +223,7 @@
         DEFAULT: 0,
         DATE_INT: 1,
         DATE_STRING: 2,
-        JSON: 3,
+        JSON_STRING: 3,
       }
       column_parsed_type = {}
 
@@ -246,7 +246,7 @@
             if (column_parsed_type[column] === null && column.endsWith('At')) {
 
               if (isDateInt(value)) {
-                column_parsed_type[column] = parse_types.DATE_INT;
+                column_parsed_type[column] = parse_types.DATE_INT
 
               } else if (!value.includes('.') && !Number.isNaN(value)) {
                 const value_int = parseInt(value)
@@ -257,8 +257,8 @@
               }
 
               // failed to detect so force it here so we don't keep checking...if the first values returned are null we fail oh well
-              switch(column_parsed_type[column])
-                case parse_types.DATE_INT:
+              switch(column_parsed_type[column]) {
+                case parse_types.DATE_INT: /* fall through */
                 case parse_types.DATE_STRING:
                   // Add columns to render human readable date values of the original column
                   curColLocation = $(`#actions-row > td:contains('${column}')`)
@@ -266,16 +266,26 @@
                   $(`<td>${column} UTC</td>`).insertAfter(curColLocation)
                   // ends up being e.g. CreatedAt, CreatdAt UTC, CreatedAt Local
                   break;
-                case parse_types.JSON:
-                  // TODO
-                case parse_types.DEFAULT:
+                case parse_types.JSON_STRING:
+                  /* do nothing since we will replace the json string with the unescaped json blob */
+                  break;
+                case parse_types.DEFAULT: /* fall through */
                 default:
-                  column_parsed_type[column] = parse_types.DEFAULT;
+                  column_parsed_type[column] = parse_types.DEFAULT
               }
+
+            } else if (column_parsed_type[column] === null && value.startsWith('{"')) {
+              column_parsed_type[column] = parse_types.JSON_STRING
             }
 
-            if (column_parsed_type[column] === parse_types.DATE_STRING) {
-              value = parseInt(value)
+
+            switch (column_parsed_type[column]) {
+              case parse_types.DATE_STRING:
+                value = parseInt(value)
+                break;
+              case parse_types.JSON_STRING:
+                value = JSON.parse(value)
+                break;
             }
 
             wrapperEl = $('<div class="preformatted"></div>')
