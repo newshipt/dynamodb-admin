@@ -36,10 +36,13 @@ const server = app.listen(port)
 server.on('listening', () => {
   const address = server.address()
   const url = `http://localhost:${address.port}`
-  console.log(`  dynamodb-admin listening on ${url} (alternatively http://0.0.0.0:${address.port})`)
+  console.log(` dynamodb-admin listening on ${url}`)
 
   if (args.open) {
     opn(url)
   }
 })
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+})

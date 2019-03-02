@@ -26,3 +26,8 @@ form[autocomplete="off"] input[type="text"] {
   background-position: 150% 50% !important;
 }
 </style>
+<script>
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
+});
+</script>

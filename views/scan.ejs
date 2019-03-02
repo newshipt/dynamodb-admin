@@ -348,7 +348,7 @@
         .catch(error => {
           const errMsg = `'Error loading data: ${error}`
           $('#table-placeholder').text(errMsg)
-          console.log(errMsg)
+          console.error(errMsg)
         })
     })
     </script>
