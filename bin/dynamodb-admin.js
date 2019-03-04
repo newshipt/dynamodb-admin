@@ -22,6 +22,11 @@ parser.addArgument(['-o', '--open'], {
   help: 'Open server URL in default browser on start',
 })
 
+parser.addArgument(['-H', '--host'], {
+  defaultValue: '0.0.0.0',
+  help: 'Hostname or IP to run on (default: 0.0.0.0)',
+})
+
 parser.addArgument(['-p', '--port'], {
   type: 'int',
   defaultValue: 8001,
@@ -31,15 +36,19 @@ parser.addArgument(['-p', '--port'], {
 const args = parser.parseArgs()
 
 const app = createServer()
+const host = process.env.HOST || args.host
 const port = process.env.PORT || args.port
-const server = app.listen(port)
+const server = app.listen(port, host)
 server.on('listening', () => {
-  const address = server.address()
-  const url = `http://localhost:${address.port}`
-  console.log(`  dynamodb-admin listening on ${url} (alternatively http://0.0.0.0:${address.port})`)
+  const host_actual = server.address().address
+  const port_actual = server.address().port
+  console.log(` dynamodb-viewer listening on http://${host_actual}:${port_actual}`)
 
   if (args.open) {
     opn(url)
   }
 })
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+})
