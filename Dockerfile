@@ -1,13 +1,17 @@
 FROM mhart/alpine-node:11.10.1
 
-ADD . .
-
-RUN npm install
-
+ENV PROJECT_NAME="dynamodb-admin"
+ENV PROJECT_ROOT="/opt/${PROJECT_NAME}"
 ENV DYNAMO_ENDPOINT="http://localhost:8000"
 ENV AWS_REGION=${AWS_REGION}
 ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+ENV NODE_ENV="development"
+
+RUN mkdir -p ${PROJECT_ROOT}
+WORKDIR ${PROJECT_ROOT}
+ADD . .
+RUN npm install
 
 EXPOSE 8001
-CMD ["node", "bin/dynamodb-admin.js"]
+CMD ["node", "${PROJECT_ROOT}/bin/dynamodb-admin.js"]
