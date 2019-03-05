@@ -52,3 +52,9 @@ server.on('listening', () => {
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
 })
+
+process.on('SIGINT', function() {
+  console.log("Quitting...");
+
+  process.exit();
+})
